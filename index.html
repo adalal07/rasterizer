@@ -1,0 +1,692 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>HW 1: Rasterizer</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 3px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-block;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1.25em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.highlight-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.highlight-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.highlight-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.highlight-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.highlight-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.highlight-default_background {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray_background {
+	background: rgba(248, 248, 247, 1);
+}
+.highlight-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.highlight-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.highlight-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.highlight-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.highlight-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.highlight-purple_background {
+	background: rgba(248, 243, 252, 1);
+}
+.highlight-pink_background {
+	background: rgba(252, 241, 246, 1);
+}
+.highlight-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.block-color-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.block-color-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.block-color-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.block-color-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.block-color-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(248, 248, 247, 1);
+}
+.block-color-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.block-color-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.block-color-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.block-color-purple_background {
+	background: rgba(248, 243, 252, 1);
+}
+.block-color-pink_background {
+	background: rgba(252, 241, 246, 1);
+}
+.block-color-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.select-value-color-uiBlue { background-color: undefined; }
+.select-value-color-pink { background-color: rgba(225, 136, 179, 0.27); }
+.select-value-color-purple { background-color: rgba(168, 129, 197, 0.27); }
+.select-value-color-green { background-color: rgba(123, 183, 129, 0.27); }
+.select-value-color-gray { background-color: rgba(84, 72, 49, 0.15); }
+.select-value-color-transparentGray { background-color: undefined; }
+.select-value-color-translucentGray { background-color: undefined; }
+.select-value-color-orange { background-color: rgba(224, 124, 57, 0.27); }
+.select-value-color-brown { background-color: rgba(210, 162, 141, 0.35); }
+.select-value-color-red { background-color: rgba(244, 171, 159, 0.4); }
+.select-value-color-yellow { background-color: rgba(236, 191, 66, 0.39); }
+.select-value-color-blue { background-color: rgba(93, 165, 206, 0.27); }
+.select-value-color-pageGlass { background-color: undefined; }
+.select-value-color-washGlass { background-color: undefined; }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="1a00aaf5-eccb-8033-ad22-ff1d45ec5859" class="page sans"><header><h1 class="page-title">HW 1: Rasterizer</h1><p class="page-description"></p></header><div class="page-body"><h3 id="1a00aaf5-eccb-8016-975c-e62aa0d3757b" class="">Overview</h3><p id="1a00aaf5-eccb-805d-9bd1-cf5105945991" class="">In this assignment, we implemented different aspects of a rasterizer, allowing us to play around with how 2D graphics can be visualized in different ways. We took a look at everything from simple rasterization of images using triangles to level and pixel sampling to texture map! I found the level sampling section very interesting, taking each of the components we had implemented earlier in the project and integrating everything together. In particular, I could distinctly see the effects of the different settings on the rasterization, which I thought was really cool. Let’s take a look at the steps it took to get there! </p><h3 id="1a00aaf5-eccb-80d2-b5b4-ca5a4a0492c3" class="">Task 1: Drawing Single-Color Triangles</h3><p id="1a00aaf5-eccb-80a7-89b0-d902526bb6bf" class="">Rasterizing any given triangle has a straightforward process once the winding order is determined. We are given three points as the input to our function, and we don’t know which order they are presented (CW or CCW). This matters for our point checks later on for rasterization. We determine the winding order of the pixels by calculating the z-component of the cross product between the three points. If this component is negative, we have a clockwise (into the page) triangle and otherwise it is counterclockwise. If the triangle is clockwise, then we want to swap two of the points to get the same set of vertices ordered counterclockwise. From there, we want to define a bounding box, which is the smallest rectangle that bounds this triangle since we use the minimum and maximum x and y values for the vertices to define it. We don’t need to check any points outside of this box since they will definitely not be contained in the triangle. Now, we iterate through each pixel in this box, which is why our time complexity is no worse than checking each sample within this bounding box of the triangle. For any given pixel, we conduct three line tests synonymous to the edges that define our triangle. If the line test yields a value greater than or equal to 0 then it is inside or on edge of the triangle. If a point satisfies this condition for all three line tests, then we can rasterize it. This involves filling the pixel value with the specified color.</p><p id="1a00aaf5-eccb-8035-8fed-f9798540989a" class="">Below is basic/test4.svg, displaying an edge of the red triangle, which has clear jaggies leading to undesirable rendering.</p><figure id="1a00aaf5-eccb-80d0-b082-cf40d2f1be9a" class="image"><a href="HW%201%20Rasterizer%201a00aaf5eccb8033ad22ff1d45ec5859/screenshot_2-19_22-22-16.png"><img style="width:710px" src="HW%201%20Rasterizer%201a00aaf5eccb8033ad22ff1d45ec5859/screenshot_2-19_22-22-16.png"/></a></figure><h3 id="1a00aaf5-eccb-8044-bb3e-fd1e6bd43545" class="">Task 2: <strong>Antialiasing by Supersampling</strong></h3><p id="1a00aaf5-eccb-80f1-b7ee-d17d512e3ccd" class="">We can improve on the previous rasterization method by removing the alias effect of jaggies through supersampling. At its core, supersampling is sampling any w x h image to a wy x hy size image and then downsampling from that output to get an anti-aliased w x h image. This technique takes advantage of the properties of averaging values to smooth out jaggies and other sharp features in the image while maintaining the contents. To implement supersampling, we need to introduce a sample_buffer which will store all of our sampled colors to resolve later. For each pixel that we sampled in the original rasterization loop, we need to split into sqrt(sample_rate) * sqrt(sample_rate) different points that we sample. For each of these points, we are applying the line tests we saw in the previous task, but instead of directly filling in the entire pixel, we add its corresponding color to the sample_buffer. After looping through all supersamples, we can now resolve the sample_buffer in the resolve function before displaying it to the screen. For each supersample for a given pixel, we average all of the values to get a new value for the current pixel. For pixels that didn’t fall within the triangle in the supersample, the color is left as white, so for pixels that lay at the edge/corner of a triangle, we get a more “transparent” color that smooths the transition between the triangle and the surrounding pixels. Looking at the sample rates of 1, 4, and 16, we can see how the jaggies are close to completely removed as we increase the sampling rate. This shows the result from the explanation above.</p><p id="1a00aaf5-eccb-8091-b73b-f2feea97fbf5" class="">1x1 Supersampling</p><figure id="1a00aaf5-eccb-8095-a419-e2178b037c41" class="image"><a href="HW%201%20Rasterizer%201a00aaf5eccb8033ad22ff1d45ec5859/screenshot_2-19_22-34-44.png"><img style="width:710px" src="HW%201%20Rasterizer%201a00aaf5eccb8033ad22ff1d45ec5859/screenshot_2-19_22-34-44.png"/></a></figure><p id="1a00aaf5-eccb-804e-88d5-dc45d4708da5" class="">2x2 Supersampling</p><figure id="1a00aaf5-eccb-801d-b453-f714a8678779" class="image"><a href="HW%201%20Rasterizer%201a00aaf5eccb8033ad22ff1d45ec5859/screenshot_2-19_22-34-47.png"><img style="width:710px" src="HW%201%20Rasterizer%201a00aaf5eccb8033ad22ff1d45ec5859/screenshot_2-19_22-34-47.png"/></a></figure><p id="1a00aaf5-eccb-8019-8e3c-e6905ce26c07" class="">4x4 Supersampling</p><figure id="1a00aaf5-eccb-805f-a397-d7ea3828906b" class="image"><a href="HW%201%20Rasterizer%201a00aaf5eccb8033ad22ff1d45ec5859/screenshot_2-19_22-34-49.png"><img style="width:710px" src="HW%201%20Rasterizer%201a00aaf5eccb8033ad22ff1d45ec5859/screenshot_2-19_22-34-49.png"/></a></figure><p id="1a00aaf5-eccb-8040-8478-e1e7d426488c" class="">
+</p><h3 id="1a00aaf5-eccb-80b2-b61b-dc28f59fa851" class="">Task 3: <strong>Transforms</strong></h3><p id="1a00aaf5-eccb-80d0-81ab-e9f6e9fc98cf" class="">The robot is now jumping into the air with its hands up!</p><figure id="1a00aaf5-eccb-80fb-85ed-f75a516b36fc" class="image"><a href="HW%201%20Rasterizer%201a00aaf5eccb8033ad22ff1d45ec5859/screenshot_2-19_22-19-56.png"><img style="width:710px" src="HW%201%20Rasterizer%201a00aaf5eccb8033ad22ff1d45ec5859/screenshot_2-19_22-19-56.png"/></a></figure><p id="1a00aaf5-eccb-802a-b93b-c79f637c0363" class="">
+</p><h3 id="1a00aaf5-eccb-80d3-ad31-ee03e218e6b2" class="">Task 4: <strong>Barycentric coordinates</strong></h3><figure id="1a00aaf5-eccb-809c-b239-f41ad8b4c037" class="image"><a href="HW%201%20Rasterizer%201a00aaf5eccb8033ad22ff1d45ec5859/screenshot_2-20_16-58-0.png"><img style="width:1600px" src="HW%201%20Rasterizer%201a00aaf5eccb8033ad22ff1d45ec5859/screenshot_2-20_16-58-0.png"/></a></figure><p id="1a00aaf5-eccb-8070-ba86-cf3f9d31ae13" class="">Barycentric coordinates are another way of looking at defining triangles and become very useful for applications like RGB interpolation and texture mapping. The central idea of barycentric coordinates is being able to represent any point inside the triangle as a linear combination of the vertices of the triangle. Here, the linear combination constants have a deeper meaning as weights telling you how much of an impact a certain vertex has on the given point we are looking at in the triangle. One example to explore this concept is RGB interpolation. Imagine we have a triangle with one red, one green and one blue vertex. Now, let’s consider a point (x, y) inside the triangle. We can write (x, y) in terms of the vertices as (x, y) = a * (v1x, v1y) + b * (v2x, v2y) + c * (v3x, v3y), where we are solving for a, b, and c. We can add another constraint where a + b + c = 1 since these are proportional weights, so their sum logically doesn’t make sense to go over 1. With these equations, we can solve for our constants. Now, we want to interpolate our RGB values, so we can apply the same linear combination to get that value: V = a * V1 + b * V2 + c * V3, where V1, V2, and V3 are the RGB values at the vertices of the triangle. Given that our three constants are non-negative, we are only able to represent points inside the triangle.</p><figure id="1a00aaf5-eccb-80d7-8268-c2d1ca79e2a3" class="image"><a href="HW%201%20Rasterizer%201a00aaf5eccb8033ad22ff1d45ec5859/screenshot_2-19_21-30-42.png"><img style="width:710px" src="HW%201%20Rasterizer%201a00aaf5eccb8033ad22ff1d45ec5859/screenshot_2-19_21-30-42.png"/></a></figure><p id="1a00aaf5-eccb-80d0-8333-dea5209cff65" class="">
+</p><h3 id="1a00aaf5-eccb-8089-a3aa-c97a629412a8" class="">Task 5: <strong>“Pixel sampling” for texture mapping</strong></h3><p id="1a00aaf5-eccb-804e-908d-d79d95c8068d" class="">Pixel sampling essentially aims to create a mapping between two spaces: our original pixel space and the sampling space. In the context of texture mapping, we are taking an image of a texture and displaying it in our own pixel space that we define. To be able to create this mapping, we can use a provided triangle in pixel space and its corresponding texture space coordinates. With this information, we can now utilize the idea of barycentric coordinates to find the corresponding alpha, beta, and gamma that correspond to a point in the triangle. We can use those weights to then find corresponding uv-coordinates for the triangle point (x, y) as a linear combination of the uv-coordinates of the vertices and the barycentric constants. Now that we have the corresponding uv-coordinates, we can sample from texture space. The two methods which we wanted to implement for sampling are nearest and bilinear. Nearest takes the closest texel in texture space to the uv-coordinates we calculated and uses its RGB value for our pixel (x, y). Bilinear is a more sophisticated algorithm which takes the four nearest texels and performs a weighted average of their RGB values. We apply 3 linear interpolations on pairs of texels to get our final result.</p><p id="1a00aaf5-eccb-8076-96b9-efe14ad8e4e2" class="">Nearest Sampling - 1x1 Pixel Supersampling</p><figure id="1a00aaf5-eccb-80ef-aa2e-f4869e5c0763" class="image"><a href="HW%201%20Rasterizer%201a00aaf5eccb8033ad22ff1d45ec5859/screenshot_2-19_21-20-6.png"><img style="width:710px" src="HW%201%20Rasterizer%201a00aaf5eccb8033ad22ff1d45ec5859/screenshot_2-19_21-20-6.png"/></a></figure><p id="1a00aaf5-eccb-80b9-90b8-e107c82ccdad" class="">Nearest Sampling - 4x4 Pixel Supersampling</p><figure id="1a00aaf5-eccb-8024-90ca-d9313883cd9c" class="image"><a href="HW%201%20Rasterizer%201a00aaf5eccb8033ad22ff1d45ec5859/screenshot_2-19_21-20-14.png"><img style="width:710px" src="HW%201%20Rasterizer%201a00aaf5eccb8033ad22ff1d45ec5859/screenshot_2-19_21-20-14.png"/></a></figure><p id="1a00aaf5-eccb-809b-863d-eb556ed57b54" class="">Bilinear Sampling - 1x1 Pixel Supersampling</p><figure id="1a00aaf5-eccb-80c8-b98d-fe05439af33d" class="image"><a href="HW%201%20Rasterizer%201a00aaf5eccb8033ad22ff1d45ec5859/screenshot_2-19_21-20-24.png"><img style="width:1600px" src="HW%201%20Rasterizer%201a00aaf5eccb8033ad22ff1d45ec5859/screenshot_2-19_21-20-24.png"/></a></figure><p id="1a00aaf5-eccb-80cb-a549-f97d0caceaf9" class="">Bilinear Sampling - 4x4 Pixel Supersampling</p><figure id="1a00aaf5-eccb-8066-87a2-da8346dbf604" class="image"><a href="HW%201%20Rasterizer%201a00aaf5eccb8033ad22ff1d45ec5859/screenshot_2-19_21-20-21.png"><img style="width:710px" src="HW%201%20Rasterizer%201a00aaf5eccb8033ad22ff1d45ec5859/screenshot_2-19_21-20-21.png"/></a></figure><p id="1a00aaf5-eccb-80c6-9047-c970eaf79d45" class="">
+</p><p id="1a00aaf5-eccb-80cd-b330-f3da7f9280da" class="">In the 1x1 supersampling case, we see that the bilinear sampling beats nearest sampling at points where our latitude lines seem to alias. The lines start breaking and nearest struggles with this since we don’t consider multiple pixels when sampling. On the other hand, bilinear handles this well, making both the longitude and latitude lines much more prominent. As we go to higher supersamples, the outputs for both nearest and bilinear converge or become more similar, but even at these settings, the bilinear output seems much more sharp and smooth at the same time. In general, the two methods will have large differences between each other when the pixels near each other are more distinct. With this setup, nearest will choose one of those pixels to use as our sample while bilinear will average leading to more unpredictable RGB values.</p><h3 id="1a00aaf5-eccb-8028-afa7-c98e23ade2b9" class="">Task 6: <strong>“Level sampling” with mipmaps for texture mapping</strong></h3><p id="1a00aaf5-eccb-8040-9cc4-ed5b6bee11aa" class="">Level sampling is a way to allow for adaptive sampling of a certain image at different resolutions. Our MipMap level is a certain resolution of the image in a stack of MipMap levels. Texture mapping is the algorithm that takes points in a texture space and maps them to pixel space where we want the texture displayed. However, texture mapping faces aliasing when using only one resolution for the texture from perspective and sampling issues. The solution for this is building a MipMap stack to accommodate for different resolutions which we would want to sample from. We determine the level to sample from for any given pixel by looking at the derivatives of the texture with respect to our pixel space. With larger changes in texture, we want to move down the stack, looking at smaller and smaller resolutions to sample from. The conversion between pixel and texture space is what becomes more complicated now that we have multiple MipMap levels.</p><p id="1a00aaf5-eccb-8001-b1b1-f4b5020b707d" class="">Going a little lower level, we needed to implement three types of level sampling: zero, nearest, and bilinear. Zero just used MipMap level 0 for all of our sampling. Nearest calculates the MipMap level that fits best for this pixel. The MipMap level is calculated using du/dx, du/dy, dv/dx, and dv/dy, which signify the derivative of the texture space coordinates with respect to the pixel space coordinates. In other words, how quickly the texture changes in pixel space. To calculate this, we need to find the change in u and v over a unit change in x and y. We can do this by calculating barycentric coordinates for both (x+1, y) and (x, y+1) in addition to (x, y) which we are already doing. Taking the difference in uv-coordinates will yield the values that we desired after scaling by the width and height of the texture. From there, we can calculate the level using the L and D equations.</p><p id="1a00aaf5-eccb-808d-8dda-deb345afae06" class="">After figuring out the level, we can follow the same sampling process as before, using either nearest or bilinear this time with the correct MipMap level. The sampling process slightly changes for the third level sampling technique, bilinear. Here, instead of just using the nearest MipMap level, we take the two adjacent MipMap levels and compute a weighted sum of the samples from both.</p><p id="1a00aaf5-eccb-806d-a016-cbc5800cea47" class="">Between L_ZERO and L_NEAREST, the memory usage and speeds are very similar since the MipMap stack is already constructed, so we only need to retrieve one of the levels depending on the get_level calculation. L_LINEAR has the highest time and memory complexity since we perform two different samples and then calculate a weighted average of the results. Both L_NEAREST and L_LINEAR drastically decrease aliasing in the output due to the dynamic nature of the sampling, but L_LINEAR looks more smooth due to the effects of averaging. As we go from L_ZERO to L_LINEAR, our framerate drops due to increase in complexity and computation.</p><p id="1a00aaf5-eccb-8084-897b-ebbb20976f70" class="">
+</p><p id="1a00aaf5-eccb-809c-8987-ec2f75779ea8" class="">Here is a PNG of my own which I applied different settings to.</p><p id="1a00aaf5-eccb-80ef-9924-c0aec2bd92f6" class=""><code>L_ZERO</code> and <code>P_NEAREST</code></p><figure id="1a00aaf5-eccb-8092-ad1c-dc2e17969a50" class="image"><a href="HW%201%20Rasterizer%201a00aaf5eccb8033ad22ff1d45ec5859/screenshot_2-20_16-44-0.png"><img style="width:1600px" src="HW%201%20Rasterizer%201a00aaf5eccb8033ad22ff1d45ec5859/screenshot_2-20_16-44-0.png"/></a></figure><p id="1a00aaf5-eccb-80eb-ab8f-c47eb4937442" class=""><code>L_ZERO</code> and <code>P_LINEAR</code></p><figure id="1a00aaf5-eccb-8028-aa5f-fa39d9fbed23" class="image"><a href="HW%201%20Rasterizer%201a00aaf5eccb8033ad22ff1d45ec5859/screenshot_2-20_16-44-17.png"><img style="width:1600px" src="HW%201%20Rasterizer%201a00aaf5eccb8033ad22ff1d45ec5859/screenshot_2-20_16-44-17.png"/></a></figure><p id="1a00aaf5-eccb-8037-89f3-f239fb6c1cbe" class=""><code>L_NEAREST</code> and <code>P_NEAREST</code></p><figure id="1a00aaf5-eccb-8006-88b2-ea4f6f751e22" class="image"><a href="HW%201%20Rasterizer%201a00aaf5eccb8033ad22ff1d45ec5859/screenshot_2-20_16-44-32.png"><img style="width:1600px" src="HW%201%20Rasterizer%201a00aaf5eccb8033ad22ff1d45ec5859/screenshot_2-20_16-44-32.png"/></a></figure><p id="1a00aaf5-eccb-80da-bd24-c877525b72a8" class=""><code>L_NEAREST</code> and <code>P_LINEAR</code></p><figure id="1a00aaf5-eccb-80b8-97c2-da07c199b02d" class="image"><a href="HW%201%20Rasterizer%201a00aaf5eccb8033ad22ff1d45ec5859/screenshot_2-20_16-44-37.png"><img style="width:1600px" src="HW%201%20Rasterizer%201a00aaf5eccb8033ad22ff1d45ec5859/screenshot_2-20_16-44-37.png"/></a></figure><p id="1a10aaf5-eccb-80eb-866e-e842570cb663" class=""><code>L_LINEAR</code> and <code>P_NEAREST</code></p><figure id="1a10aaf5-eccb-80ab-a54a-ddd1a488f065" class="image"><a href="HW%201%20Rasterizer%201a00aaf5eccb8033ad22ff1d45ec5859/screenshot_2-20_16-44-57.png"><img style="width:710px" src="HW%201%20Rasterizer%201a00aaf5eccb8033ad22ff1d45ec5859/screenshot_2-20_16-44-57.png"/></a></figure><p id="1a10aaf5-eccb-8034-a354-c46851928360" class=""><code>L_LINEAR</code> and <code>P_LINEAR</code></p><figure id="1a10aaf5-eccb-8002-84ca-dbba3bb58719" class="image"><a href="HW%201%20Rasterizer%201a00aaf5eccb8033ad22ff1d45ec5859/screenshot_2-20_16-44-59.png"><img style="width:710px" src="HW%201%20Rasterizer%201a00aaf5eccb8033ad22ff1d45ec5859/screenshot_2-20_16-44-59.png"/></a></figure><p id="1a00aaf5-eccb-807b-8ee2-dfd8ecfc6a85" class="">One nuance of bilinear pixel sampling is that we see that the pixels in the image get lighter due to the averaging aspect of the algorithm. In the previous task, we mentioned how very drastic changes in color isn’t the best for bilinear pixel sampling and we can see that in action in these examples.</p><p id="1a10aaf5-eccb-8025-994d-d01d0ae30d52" class="">
+</p><h3 id="1a10aaf5-eccb-8023-8b67-f2b048dde342" class="">Conclusion</h3><p id="1a10aaf5-eccb-8047-a65d-d0d4086bfd79" class="">I really enjoy playing around the with the different settings for each task, especially with the level sampling implementation. Testing the level and pixel sampling on different image types with different plausible aliasing patterns was pretty cool to see how these techniques differ in tackling the issues. I tried out quite a few of my own PNGs with different grid patterns and layouts to see how these algorithms did against “different difficulties” of inputs. Overall, the project was an exploration of different ways we can remove aliasing issues that were present with our most simple rasterization method building up to what present-day graphics systems use for 2D rendering!</p><p id="1a00aaf5-eccb-8008-aa3a-ceaa4fa0b129" class="">
+</p><p id="1a10aaf5-eccb-80a9-ad40-fdd83eec8064" class="">
+</p></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>
